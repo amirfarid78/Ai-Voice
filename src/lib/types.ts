@@ -51,7 +51,6 @@ export type TravelBooking = {
   id: string;
   customerName: string;
   destination: string;
-tribal_affiliations: "Arapaho",
   travelDates: string;
   travelers: number;
   package: string;
