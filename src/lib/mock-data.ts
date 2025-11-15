@@ -43,7 +43,7 @@ export const mockAiScripts: AiScript[] = [
 ];
 
 export const mockWebhookLogs: WebhookLog[] = [
-  { id: 'wh_1', service: 'WooCommerce', url: '/api/webhook/woocommerce/new-order', status: 'Success', timestamp: '2023-10-26 12:01 PM', payload: '{"order_id": 3459, ...}' },
-  { id: 'wh_2', service: 'WooCommerce', url: '/api/webhook/woocommerce/new-order', status: 'Success', timestamp: '2023-10-26 11:45 AM', payload: '{"order_id": 3458, ...}' },
+  { id: 'wh_1', service: 'WooCommerce', url: '/api/webhook/woocommerce/new-order', status: 'Success', timestamp: '2023-10-26 12:01 PM', payload: '{"order_id": 3459, "status": "completed"}' },
+  { id: 'wh_2', service: 'WooCommerce', url: '/api/webhook/woocommerce/new-order', status: 'Success', timestamp: '2023-10-26 11:45 AM', payload: '{"order_id": 3458, "status": "pending"}' },
   { id: 'wh_3', service: 'WooCommerce', url: '/api/webhook/woocommerce/new-order', status: 'Failed', timestamp: '2023-10-26 11:30 AM', payload: '{"error": "Invalid signature"}' },
 ];
