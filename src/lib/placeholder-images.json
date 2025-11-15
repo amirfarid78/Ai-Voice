@@ -1,3 +1,22 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "avatar-1",
+      "description": "User avatar for Alex Johnson",
+      "imageUrl": "https://i.pravatar.cc/150?u=usr_1",
+      "imageHint": "portrait person"
+    },
+    {
+      "id": "avatar-2",
+      "description": "User avatar for Maria Garcia",
+      "imageUrl": "https://i.pravatar.cc/150?u=usr_2",
+      "imageHint": "portrait woman"
+    },
+    {
+      "id": "avatar-3",
+      "description": "User avatar for James Smith",
+      "imageUrl": "https://i.pravatar.cc/150?u=usr_3",
+      "imageHint": "portrait man"
+    }
+  ]
 }
