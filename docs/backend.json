@@ -1,0 +1,50 @@
+{
+  "entities": {
+    "user": {
+      "title": "User",
+      "description": "Represents a user in the system.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The user's unique ID."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "avatar": {
+            "type": "string",
+            "description": "URL of the user's avatar"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["Admin", "Agent"],
+          "description": "The user's role."
+        },
+        "joinedDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the user joined"
+        }
+      },
+      "required": ["uid", "name", "email", "role", "joinedDate"]
+    }
+  },
+  "auth": {
+    "providers": ["password"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/user"
+      },
+      "description": "Stores user profile information."
+    }
+  }
+}

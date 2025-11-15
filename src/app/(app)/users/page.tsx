@@ -1,8 +1,32 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import {
+  collection,
+  onSnapshot,
+  addDoc,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore';
+import { getFirebase } from '@/firebase';
 import { mockUsers } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal } from 'lucide-react';
 import {
@@ -11,18 +35,59 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { User } from '@/lib/types';
 
 export default function UsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+  const { firestore } = getFirebase();
+
+  useEffect(() => {
+    const usersCol = collection(firestore, 'users');
+    const unsubscribe = onSnapshot(usersCol, (snapshot) => {
+      const usersData = snapshot.docs.map(
+        (doc) =>
+          ({
+            id: doc.id,
+            ...doc.data(),
+          } as User)
+      );
+      setUsers(usersData);
+    });
+
+    return () => unsubscribe();
+  }, [firestore]);
+
+  const addUser = async () => {
+    // For demonstration, we'll add a mock user.
+    // In a real app, you'd have a form to collect user data.
+    const newUser = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+    const usersCol = collection(firestore, 'users');
+    await addDoc(usersCol, {
+        ...newUser,
+        // The user ID would typically come from Firebase Auth
+        uid: `mock-uid-${Date.now()}` 
+    });
+  };
+
+  const deleteUser = async (userId: string) => {
+    const userDoc = doc(firestore, 'users', userId);
+    await deleteDoc(userDoc);
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold font-headline tracking-tight">Users</h1>
-        <Button>Add User</Button>
+        <h1 className="text-3xl font-bold font-headline tracking-tight">
+          Users
+        </h1>
+        <Button onClick={addUser}>Add User</Button>
       </div>
       <Card>
         <CardHeader>
           <CardTitle>Team Members</CardTitle>
-          <CardDescription>Manage your team members and their roles.</CardDescription>
+          <CardDescription>
+            Manage your team members and their roles.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -35,7 +100,7 @@ export default function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockUsers.map((user) => (
+              {users.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -45,12 +110,16 @@ export default function UsersPage() {
                       </Avatar>
                       <div>
                         <div className="font-medium">{user.name}</div>
-                        <div className="text-sm text-muted-foreground">{user.email}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={user.role === 'Admin' ? 'default' : 'secondary'}>{user.role}</Badge>
+                    <Badge variant={user.role === 'Admin' ? 'default' : 'secondary'}>
+                      {user.role}
+                    </Badge>
                   </TableCell>
                   <TableCell>{user.joinedDate}</TableCell>
                   <TableCell className="text-right">
@@ -63,7 +132,12 @@ export default function UsersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive"
+                          onClick={() => deleteUser(user.id)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
