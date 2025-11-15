@@ -24,7 +24,7 @@ export default function BookingsLayout({
       <Tabs defaultValue={activeTab} className="w-full">
         <TabsList>
           {bookingTabs.map((tab) => (
-            <Link key={tab.value} href={tab.href} passHref legacyBehavior>
+            <Link key={tab.value} href={tab.href} legacyBehavior={false}>
               <TabsTrigger value={tab.value}>{tab.label}</TabsTrigger>
             </Link>
           ))}
