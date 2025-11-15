@@ -13,6 +13,7 @@ import {
   ShoppingCart,
   Users,
   Webhook,
+  Mic,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -42,6 +43,7 @@ const menuItems = [
   { href: '/calls', label: 'Calls Log', icon: Phone },
   { href: '/orders', label: 'WooCommerce Orders', icon: ShoppingCart },
   { href: '/bookings', label: 'Bookings', icon: Calendar },
+  { href: '/dialer', label: 'Dialer', icon: Mic },
   { href: '/scripts', label: 'AI Voice Scripts', icon: Bot },
   { href: '/webhooks', label: 'Webhook Logs', icon: Webhook },
   { href: '/settings', label: 'Settings', icon: Settings },
