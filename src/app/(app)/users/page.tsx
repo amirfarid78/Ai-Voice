@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,9 +8,10 @@ import {
   addDoc,
   deleteDoc,
   doc,
+  setDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { getFirebase } from '@/firebase';
-import { mockUsers } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,9 +38,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { User } from '@/lib/types';
+import { UserFormDialog } from '@/components/users/user-form-dialog';
+import { format } from 'date-fns';
+
+type UserWithId = User & { id: string; };
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserWithId[]>([]);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserWithId | null>(null);
   const { firestore } = getFirebase();
 
   useEffect(() => {
@@ -49,7 +57,7 @@ export default function UsersPage() {
           ({
             id: doc.id,
             ...doc.data(),
-          } as User)
+          } as UserWithId)
       );
       setUsers(usersData);
     });
@@ -57,16 +65,23 @@ export default function UsersPage() {
     return () => unsubscribe();
   }, [firestore]);
 
-  const addUser = async () => {
-    // For demonstration, we'll add a mock user.
-    // In a real app, you'd have a form to collect user data.
-    const newUser = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+  const handleAddUser = async (data: Omit<User, 'id' | 'joinedDate' | 'avatar'>) => {
     const usersCol = collection(firestore, 'users');
     await addDoc(usersCol, {
-        ...newUser,
-        // The user ID would typically come from Firebase Auth
-        uid: `mock-uid-${Date.now()}` 
+      ...data,
+      uid: `mock-uid-${Date.now()}`,
+      avatar: `https://i.pravatar.cc/150?u=${Date.now()}`,
+      joinedDate: format(new Date(), 'yyyy-MM-dd'),
     });
+    setIsFormOpen(false);
+  };
+
+  const handleUpdateUser = async (data: Omit<User, 'id' | 'joinedDate' | 'avatar'>) => {
+    if (!editingUser) return;
+    const userDoc = doc(firestore, 'users', editingUser.id);
+    await setDoc(userDoc, data, { merge: true });
+    setEditingUser(null);
+    setIsFormOpen(false);
   };
 
   const deleteUser = async (userId: string) => {
@@ -74,13 +89,32 @@ export default function UsersPage() {
     await deleteDoc(userDoc);
   };
 
+  const openAddUserForm = () => {
+    setEditingUser(null);
+    setIsFormOpen(true);
+  };
+
+  const openEditUserForm = (user: UserWithId) => {
+    setEditingUser(user);
+    setIsFormOpen(true);
+  };
+
+  const handleFormSubmit = (data: any) => {
+    if (editingUser) {
+      handleUpdateUser(data);
+    } else {
+      handleAddUser(data);
+    }
+  };
+
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-headline tracking-tight">
           Users
         </h1>
-        <Button onClick={addUser}>Add User</Button>
+        <Button onClick={openAddUserForm}>Add User</Button>
       </div>
       <Card>
         <CardHeader>
@@ -131,7 +165,7 @@ export default function UsersPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openEditUserForm(user)}>Edit</DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={() => deleteUser(user.id)}
@@ -147,6 +181,15 @@ export default function UsersPage() {
           </Table>
         </CardContent>
       </Card>
+       <UserFormDialog
+        isOpen={isFormOpen}
+        onClose={() => {
+          setIsFormOpen(false);
+          setEditingUser(null);
+        }}
+        onSubmit={handleFormSubmit}
+        user={editingUser}
+      />
     </div>
   );
 }
